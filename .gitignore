@@ -16,3 +16,9 @@
 
 # Goland
 .idea
+
+# env
+.env
+
+# build
+bin/

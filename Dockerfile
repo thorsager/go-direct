@@ -15,16 +15,15 @@ COPY go.* /build/
 RUN go mod download
 
 ADD . /build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -a -tags netgo -ldflags "-X main.version=$(git describe --tags --dirty --always) -w -extldflags -static" \
-        -o /build/go-direct .
+RUN make
 
 FROM gcr.io/distroless/static
 USER nonroot
 WORKDIR /
 
-COPY --from=build /build/go-direct /
+COPY --from=build /build/bin/godirectd /
+COPY --from=build /build/web /web
 
 EXPOSE 8080
 
-ENTRYPOINT ["/go-direct"]
+ENTRYPOINT ["/godirectd"]
