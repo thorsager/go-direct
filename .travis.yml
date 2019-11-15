@@ -5,9 +5,6 @@ go:
 env:
 - IMAGE_NAME=thorsager/go-direct
 
-services:
-- docker
-
 jobs:
   include:
   - stage: test
@@ -15,6 +12,8 @@ jobs:
 
   - stage: build docker image (branch)
     if: NOT branch = master
+    services:
+    - docker
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
     - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_BRANCH}"
@@ -22,6 +21,8 @@ jobs:
 
   - stage: release docker image (release)
     if: NOT tag = ""
+    services:
+    - docker
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
     - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_TAG}"
@@ -29,6 +30,8 @@ jobs:
 
   - stage: docker image (latest)
     if: (tag = "") AND (branch = master)
+    services:
+    - docker
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
     - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:latest"
