@@ -32,7 +32,9 @@ if [ -n "$LOGIN" ]; then
 		echo "both REGISTRY_USER and REGISTRY_PASSWORD are required, please set"
 		exit 7	
 	fi
+	echo "==> logging in as $REGISTRY_USERNAME"
 	echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin
 fi
 
+echo "==> pushing $NAME"
 docker push "$NAME"

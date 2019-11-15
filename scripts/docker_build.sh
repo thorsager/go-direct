@@ -20,4 +20,5 @@ if [ -z "$IMGNAME" ]; then
 	exit 7
 fi
 
+echo "==> building $IMGNAME"
 docker build -t ${IMGNAME} .

@@ -18,6 +18,13 @@ while getopts ":s:t:" opt; do
 			echo >&2 "               tag is to be added"
 			echo >&2 "  -t <tag>     Name of the tag to be added"
 			echo >&2 ""
+			exit 7
 	esac
 done
+if [[ -z "$SOURCE" ]] || [[ -z "$TARGET" ]]; then
+	echo >&2 "both source and tag are requred, use -s and -t"
+	exit 7
+fi
+
+echo "==> tagging $SOURCE as $TARGET"
 docker tag "$SOURCE" "$TARGET" 
