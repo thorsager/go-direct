@@ -16,7 +16,7 @@ jobs:
     if: NOT branch == master
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
-    - ./scripts/docker_tag.sh -s "${TRAVIS_BUIL_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
+    - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
     - ./scripts/docker_login.sh
     - docker push "${IMAGE_NAME}/${TRAVIS_BRANCH}"
 
