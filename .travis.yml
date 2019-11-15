@@ -12,6 +12,7 @@ script:
 - make
 
 deploy:
+  provider: script
   script:
   - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
   - ./scripts/docker_tag.sh -s "${TRAVIS_BUIL_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
