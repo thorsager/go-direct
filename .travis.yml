@@ -16,22 +16,5 @@ jobs:
     if: NOT branch == master
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
-    - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
-    - ./scripts/docker_login.sh
-    - docker push "${IMAGE_NAME}/${TRAVIS_BRANCH}"
-
-#script:
-#- make test
-#- make
-#
-#deploy:
-#  provider: script
-#  script:
-#  - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
-#  - ./scripts/docker_tag.sh -s "${TRAVIS_BUIL_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
-#  - ./scripts/docker_login.sh
-#  - docker push "${IMAGE_NAME}/${TRAVIS_BRANCH}"
-#  on:
-#    all_branches: true
-#    condition: $TRAVIS_BRANCH != master 
-
+    - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_BRANCH}"
+    - ./scripts/docker_push.sh -l -n "${IMAGE_NAME}:${TRAVIS_BRANCH}"
