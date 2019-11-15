@@ -6,7 +6,7 @@ services:
 - docker
 
 script:
-- docker build -t ${TRAVIS_BUILD_ID}
+- docker build -t ${TRAVIS_BUILD_ID} .
 
 deploy:
   script:
