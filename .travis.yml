@@ -1,6 +1,8 @@
 language: go
 go:
 - 1.13.x
+env:
+- IMAGE_NAME=thorsager/go-direct
 
 services:
 - docker
@@ -11,10 +13,11 @@ script:
 
 deploy:
   script:
-  - docker build -t ${TRAVIS_BUILD_ID} .
-  - docker tag ${TRAVIS_BILD_ID} thorsager/go-direct:${TRAVIS_BRANCH}
-  - echo "${REGISTRY_PASSWORD}" | docker login -u "$REGISTRY_USERNAME" --password-stdin
-  - docker push thorsager/go-direct:${TRAVIS_BRANCH}
+  - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
+  - ./scripts/docker_tag.sh -s "${TRAVIS_BUIL_ID}" -t "${IMAGE_NAME}/${TRAVIS_BRANCH}"
+  - ./scripts/docker_login.sh
+  - docker push "${IMAGE_NAME}/${TRAVIS_BRANCH}"
   on:
-	tags: true
+	all_branches: true
+  if: branch != master
 
