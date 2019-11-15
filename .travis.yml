@@ -12,9 +12,24 @@ jobs:
   include:
   - stage: test
     script: make test
-  - stage: build docker image
-    if: NOT branch == master
+
+  - stage: build docker image (branch)
+    if: NOT branch = master
     script:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
     - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_BRANCH}"
     - ./scripts/docker_push.sh -l -n "${IMAGE_NAME}:${TRAVIS_BRANCH}"
+
+  - stage: release docker image (release)
+    if: NOT tag = ""
+    script:
+    - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
+    - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_TAG}"
+    - ./scripts/docker_push.sh -l -n "${IMAGE_NAME}:${TRAVIS_TAG}"
+
+  - stage: docker image (latest)
+    if: (tag = "") AND (branch = master)
+    script:
+    - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
+    - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:latest"
+    - ./scripts/docker_push.sh -l -n "${IMAGE_NAME}:latest"
