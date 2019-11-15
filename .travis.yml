@@ -10,8 +10,11 @@ script:
 
 deploy:
   script:
-  - 
   - docker tag ${TRAVIS_BILD_ID} thorsager/go-direct:${TRAVIS_BRANCH}
   - echo "${REGISTRY_PASSWORD}" | docker login -u "$REGISTRY_USERNAME" --password-stdin
   - docker push thorsager/go-direct:${TRAVIS_BRANCH}
+  on:
+    branch:
+      except: 
+      - master
 
