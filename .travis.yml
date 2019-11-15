@@ -21,5 +21,3 @@ deploy:
     all_branches: true
     condition: $TRAVIS_BRANCH != master 
 
-  if: branch != master
-
