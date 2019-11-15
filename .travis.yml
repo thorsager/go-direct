@@ -1,4 +1,17 @@
 language: go
 go:
-  - 1.12.x
-  - 1.13.x
+- 1.13.x
+
+services:
+- docker
+
+script:
+- docker build -t ${TRAVIS_BUILD_ID}
+
+deploy:
+  script:
+  - 
+  - docker tag ${TRAVIS_BILD_ID} thorsager/go-direct:${TRAVIS_BRANCH}
+  - echo "${REGISTRY_PASSWORD}" | docker login -u "$REGISTRY_USERNAME" --password-stdin
+  - docker push thorsager/go-direct:${TRAVIS_BRANCH}
+
