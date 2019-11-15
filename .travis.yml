@@ -6,15 +6,15 @@ services:
 - docker
 
 script:
-- docker build -t ${TRAVIS_BUILD_ID} .
+- make test
+- make
 
 deploy:
   script:
+  - docker build -t ${TRAVIS_BUILD_ID} .
   - docker tag ${TRAVIS_BILD_ID} thorsager/go-direct:${TRAVIS_BRANCH}
   - echo "${REGISTRY_PASSWORD}" | docker login -u "$REGISTRY_USERNAME" --password-stdin
   - docker push thorsager/go-direct:${TRAVIS_BRANCH}
   on:
-    branchs:
-      except: 
-      - master
+	tags: true
 

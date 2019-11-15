@@ -53,3 +53,17 @@ $(BINDIR)/$(BINNAME): $(SRC)
 	GO111MODULE=on go build $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(BINNAME) ./cmd/godirectd
 
 
+# ------------------------------------------------------------------------------
+#  test
+.PHONY: test
+test: build
+test: TESTFLAGS += -race -v
+test: test-unit
+
+
+.PHONY: test-unit
+test-unit:
+	@echo
+	@echo "==> Running unit tests <=="
+	GO111MODULE=on go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
+
