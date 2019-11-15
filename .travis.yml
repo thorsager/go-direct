@@ -18,6 +18,6 @@ deploy:
   - ./scripts/docker_login.sh
   - docker push "${IMAGE_NAME}/${TRAVIS_BRANCH}"
   on:
-	all_branches: true
+    all_branches: true
   if: branch != master
 
