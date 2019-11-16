@@ -50,7 +50,7 @@ function create_redirect() {
             console.log(`Done, got ${xhr.response.length} bytes`); // responseText is the server
             rply = JSON.parse(xhr.responseText);
             console.log(rply);
-            add_redirect('out', rply, false);
+            add_redirect('out', rply, true);
         }
     };
 
