@@ -1,0 +1,49 @@
+body {
+    font: 1rem 'Fira Sans', sans-serif;
+}
+
+/*label {*/
+/*    display: block;*/
+/*}*/
+
+img.small-icon {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    vertical-align: middle;
+}
+
+.cursor-click {
+    cursor: pointer;
+}
+
+input,
+label {
+    margin: .4rem 0;
+}
+
+#error {
+    font-size: smaller;
+}
+
+#out {
+    font-family: monospace, monospace;
+}
+
+#input_url {
+    font-size: inherit;
+    width: 500px;
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    /*border: 3px solid gray;*/
+    padding: 10px;
+}
+
+button {
+    margin-top: 10px;
+}

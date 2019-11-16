@@ -98,10 +98,6 @@ func setupDynamic() {
 		log.Fatal("Site hostname is required, please set SITE_HOSTNAME")
 	}
 	dStore := godirect.NewDynamicDirectStore()
-	dStore.Path2UrlFunc(func(p string) string {
-		u, _ := directorUrl.Parse(p)
-		return u.String()
-	})
 
 	rootStore.Add(dStore)
 
@@ -110,7 +106,7 @@ func setupDynamic() {
 		dir = d
 	}
 
-	srv.Router().Host(siteHostname).PathPrefix("/api").HandlerFunc(dStore.HandleFunc)
+	srv.Router().Host(siteHostname).PathPrefix("/api").HandlerFunc(godirect.DynamicDirectHandlerFunc(directorUrl, dStore))
 	srv.Router().Host(siteHostname).PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(dir))))
 	log.Printf("  directorURL: %s", directorUrl)
 	log.Printf("      siteURL: http://%s:%d", siteHostname, port)

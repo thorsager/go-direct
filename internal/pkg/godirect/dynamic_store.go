@@ -3,11 +3,10 @@ package godirect
 import (
 	"encoding/base64"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -16,22 +15,26 @@ func init() {
 }
 
 type DynamicDirect struct {
-	Id         uint64 `json:"id"`
-	StatusCode int    `json:"code"`
-	Url        string `json:"url"`
-	Path       string `json:"path"`
+	id         uint64
+	statusCode int
+	path       string
+	targetUrl  string
 }
 
 func (d *DynamicDirect) URL() string {
-	return d.Url
+	return d.targetUrl
 }
 
 func (d *DynamicDirect) Code() int {
-	return d.StatusCode
+	return d.statusCode
 }
 
 func (d *DynamicDirect) String() string {
-	return fmt.Sprintf("%s(%d) -> (%d)%s", d.Path, d.Id, d.StatusCode, d.Url)
+	return fmt.Sprintf("%s(%d) -> (%d)%s", d.path, d.id, d.statusCode, d.targetUrl)
+}
+
+func (d *DynamicDirect) Path() string {
+	return d.path
 }
 
 type DynamicDirectStore struct {
@@ -43,12 +46,19 @@ func NewDynamicDirectStore() *DynamicDirectStore {
 	return &DynamicDirectStore{}
 }
 
+func trimPath(path string) string {
+	if strings.HasPrefix(path, "/") {
+		return path[1:]
+	}
+	return path
+}
+
 func (s *DynamicDirectStore) Lookup(path string) (Direct, error) {
 	if s.store == nil {
 		return nil, &NotFoundError{path: path}
 	}
-
-	id, err := asNumber(path[1:])
+	tp := trimPath(path)
+	id, err := asNumber(tp)
 	if err != nil {
 		return nil, &NotFoundError{path: path}
 	}
@@ -70,19 +80,14 @@ func (s *DynamicDirectStore) Path2UrlFunc(urlFunc path2urlFunc) {
 	s.path2urlFunc = urlFunc
 }
 
-type CreateRequest struct {
-	Code int    `json:"code"`
-	Url  string `json:"url"`
-}
-
-func (s *DynamicDirectStore) HandleFunc(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		s.createDirect(w, r)
-	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-	}
-}
+//func (s *DynamicDirectStore) HandleFunc(w http.ResponseWriter, r *http.Request) {
+//	switch r.Method {
+//	case http.MethodPost:
+//		s.createDirect(w, r)
+//	default:
+//		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+//	}
+//}
 
 func (s *DynamicDirectStore) newId() (uint64, error) {
 	maxCount := 10
@@ -96,52 +101,59 @@ func (s *DynamicDirectStore) newId() (uint64, error) {
 	return 0, fmt.Errorf("unable to find availabel id in %d rounds", maxCount)
 }
 
-func (s *DynamicDirectStore) createDirect(w http.ResponseWriter, r *http.Request) {
-	cRequest := &CreateRequest{}
-	err := json.NewDecoder(r.Body).Decode(cRequest)
+func (s *DynamicDirectStore) CreateAndAdd(code int, targetUrl *url.URL) (Direct, error) {
+	d, err := s.Create(code, targetUrl)
 	if err != nil {
-		http.Error(w, "Bad Request\n"+err.Error(), http.StatusBadRequest)
-		return
+		return nil, err
 	}
-	targetUrl, err := url.Parse(cRequest.Url)
+	err = s.Add(d)
 	if err != nil {
-		http.Error(w, "Bad Request\n"+err.Error(), http.StatusBadRequest)
-		return
+		return nil, err
 	}
+	return d, nil
+}
 
-	if !in(targetUrl.Scheme, "http", "https") {
-		http.Error(w, "Bad Request\nInvalid url scheme (http,https)", http.StatusBadRequest)
-		return
-	}
-
-	if !in(cRequest.Code, http.StatusTemporaryRedirect, http.StatusMovedPermanently) {
-		http.Error(w, "Bad Request\nInvalid code (301,307)", http.StatusBadRequest)
-		return
-	}
-
+func (s *DynamicDirectStore) Create(code int, targetUrl *url.URL) (Direct, error) {
 	id, err := s.newId()
 	if err != nil {
-		http.Error(w, "Internal Server Error\n"+err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
-	p := asString(id)
-	if s.path2urlFunc != nil {
-		p = s.path2urlFunc(p)
+	direct := &DynamicDirect{
+		id:         id,
+		statusCode: code,
+		targetUrl:  targetUrl.String(),
+		path:       asString(id),
 	}
-	d := &DynamicDirect{
-		Id:         id,
-		StatusCode: cRequest.Code,
-		Url:        targetUrl.String(),
-		Path:       s.path2urlFunc(asString(id)),
+	return direct, nil
+}
+
+func (s *DynamicDirectStore) Add(direct Direct) error {
+	dd, ok := direct.(*DynamicDirect)
+	if !ok {
+		return fmt.Errorf("unable to do casting to *DynamicDirect")
 	}
 	if s.store == nil {
 		s.store = make(map[uint64]DynamicDirect)
 	}
-	s.store[d.Id] = *d
-	err = json.NewEncoder(w).Encode(d)
-	if err != nil {
-		http.Error(w, "Internal Server Error\n"+err.Error(), http.StatusInternalServerError)
+	if _, found := s.store[dd.id]; !found {
+		s.store[dd.id] = *dd
+	} else {
+		return fmt.Errorf("storage id clash (%d)", dd.id)
 	}
+	return nil
+}
+
+func (s *DynamicDirectStore) Remove(path string) error {
+	d, err := s.Lookup(path)
+	if err != nil {
+		return err
+	}
+	dd, ok := d.(*DynamicDirect)
+	if !ok {
+		return fmt.Errorf("unable to do casting to *DynamicDirect")
+	}
+	delete(s.store, dd.id)
+	return nil
 }
 
 func in(needle interface{}, haystack ...interface{}) bool {
@@ -160,6 +172,9 @@ func asString(number uint64) string {
 }
 
 func asNumber(uint64base string) (uint64, error) {
+	if len(uint64base) != 11 {
+		return 0, fmt.Errorf("invalid string length")
+	}
 	buffer, err := base64.RawURLEncoding.DecodeString(uint64base)
 	if err != nil {
 		return 0, err

@@ -9,12 +9,6 @@ func NewMultiStore(stores ...DirectStore) *MultiStore {
 	return &MultiStore{stores: stores}
 }
 
-func (m *MultiStore) Path2UrlFunc(urlFunc path2urlFunc) {
-	for _, s := range m.stores {
-		s.Path2UrlFunc(urlFunc)
-	}
-}
-
 func (m *MultiStore) Lookup(path string) (Direct, error) {
 	for _, s := range m.stores {
 		target, err := s.Lookup(path)
@@ -38,8 +32,5 @@ func (m *MultiStore) All() []Direct {
 }
 
 func (m *MultiStore) Add(store DirectStore) {
-	if m.path2urlFunc != nil {
-		store.Path2UrlFunc(m.path2urlFunc)
-	}
 	m.stores = append(m.stores, store)
 }

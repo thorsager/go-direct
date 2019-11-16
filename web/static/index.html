@@ -3,100 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>go-direct</title>
-    <style>
-        body {
-            font: 1rem 'Fira Sans', sans-serif;
-        }
-
-        label {
-            display: block;
-        }
-
-        input,
-        label {
-            margin: .4rem 0;
-        }
-
-        #out {
-            font-family: monospace, monospace;
-        }
-
-        .center {
-            margin: auto;
-            width: 50%;
-            border: 3px solid gray;
-            padding: 10px;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-    </style>
-    <script>
-        function create_redirect() {
-            if (!validate_input()) {
-                return
-            }
-            let xhr = new XMLHttpRequest();
-            xhr.open('post', '/api');
-            xhr.onload = function () {
-                let rply;
-                let out;
-                let inputUrl;
-                if (xhr.status != 200) { // analyze HTTP status of the response
-                    console.log(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
-                } else { // show the result
-                    console.log(`Done, got ${xhr.response.length} bytes`); // responseText is the server
-                    rply = JSON.parse(xhr.responseText);
-                    console.log(rply);
-                    out = document.getElementById('out');
-                    inputUrl = document.getElementById('input_url');
-                    inputUrl.value = '';
-                    out.insertAdjacentHTML("beforeend", `<div><a target="_blank" href="${rply.path}">${rply.path}</a> -> <a href="${rply.url}">${rply.url}</a></div>`);
-                }
-            };
-
-            xhr.onerror = function () {
-                console.log(`Network Error`)
-            };
-
-            xhr.onprogress = function (event) { // triggers periodically
-                // event.loaded - how many bytes downloaded
-                // event.lengthComputable = true if the server sent Content-Length header
-                // event.total - total number of bytes (if lengthComputable)
-                console.log(`Received ${event.loaded} of ${event.total}`);
-            };
-            let inputUrl = document.getElementById('input_url');
-            xhr.send(JSON.stringify({code: 307, url: inputUrl.value}))
-        }
-
-        function validate_input() {
-            let out;
-            let url = document.getElementById('input_url');
-            if (!url.checkValidity()) {
-                out = document.getElementById('error');
-                out.innerHTML = url.validationMessage;
-                return false
-            } else {
-                return true
-            }
-
-        }
-    </script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/site.js"></script>
 </head>
 <body>
 
 <div class="center">
-    <label for="input_url">Enter URL</label>
+    <h1>Create redirect Link</h1>
+    <label for="input_url">To:</label>
     <input type="url" name="input_url" id="input_url"
            placeholder="https://example.com"
            pattern="http(s)?://.*"
            required
     >
-    <span id="error"></span>
-    <br/>
     <button type="button" onclick="create_redirect();">Create</button>
-
+    <div id="error"></div>
     <div id="out">
     </div>
 </div>

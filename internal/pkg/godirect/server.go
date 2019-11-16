@@ -56,7 +56,8 @@ func (s *Server) ListenAndServeTLS(certFile, keyFile string) error {
 
 func (s *Server) redirect(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
-	if target, err := s.store.Lookup(r.URL.Path); err == nil {
+	path := r.URL.Path
+	if target, err := s.store.Lookup(path); err == nil {
 		defer log.Printf("Redirected %s in %v", target, time.Now().Sub(startTime))
 		http.Redirect(w, r, target.URL(), target.Code())
 	} else {

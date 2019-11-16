@@ -6,9 +6,8 @@ import (
 )
 
 type ExactMatchStore struct {
-	path2urlFunc path2urlFunc
-	redirectMap  map[string]string
-	code         int
+	redirectMap map[string]string
+	code        int
 }
 
 type ExactMatchDirect struct {
@@ -23,6 +22,10 @@ func (d *ExactMatchDirect) URL() string {
 
 func (d *ExactMatchDirect) Code() int {
 	return d.code
+}
+
+func (d *ExactMatchDirect) Path() string {
+	return d.path
 }
 
 func (d *ExactMatchDirect) String() string {
@@ -45,18 +48,10 @@ func (s *ExactMatchStore) Lookup(path string) (Direct, error) {
 	return nil, &NotFoundError{path: path}
 }
 
-func (s *ExactMatchStore) Path2UrlFunc(urlFunc path2urlFunc) {
-	s.path2urlFunc = urlFunc
-}
-
 func (s *ExactMatchStore) All() []Direct {
 	var all []Direct
 	for path, url := range s.redirectMap {
-		p := path
-		if s.path2urlFunc != nil {
-			p = s.path2urlFunc(p)
-		}
-		all = append(all, &ExactMatchDirect{path: p, code: s.code, url: url})
+		all = append(all, &ExactMatchDirect{path: path, code: s.code, url: url})
 	}
 	return all
 }
