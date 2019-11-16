@@ -96,10 +96,16 @@ func setupDynamic() {
 		log.Fatalf("invalid DIRECTOR_URL: %s", err)
 	}
 
-	siteHostname := os.Getenv("SITE_HOSTNAME")
-	if siteHostname == "" {
-		log.Fatal("Site hostname is required, please set SITE_HOSTNAME")
+	siteUrlStr := os.Getenv("SITE_URL")
+	if siteUrlStr == "" {
+		log.Fatal("Site url is required, please set SITE_URL")
 	}
+
+	siteUrl, err := url.Parse(siteUrlStr)
+	if err != nil {
+		log.Fatalf("invalid DIRECTOR_URL: %s", err)
+	}
+
 	dStore := ephemeralDirectStore.New()
 
 	rootStore.Add(dStore)
@@ -109,8 +115,8 @@ func setupDynamic() {
 		dir = d
 	}
 
-	srv.Router().Host(siteHostname).PathPrefix("/api").HandlerFunc(godirect.DynamicDirectHandlerFunc(directorUrl, dStore))
-	srv.Router().Host(siteHostname).PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(dir))))
+	srv.Router().Host(siteUrl.Hostname()).PathPrefix("/api").HandlerFunc(godirect.DynamicDirectHandlerFunc(directorUrl, dStore))
+	srv.Router().Host(siteUrl.Hostname()).PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(dir))))
 	log.Printf("  directorURL: %s", directorUrl)
-	log.Printf("      siteURL: http://%s:%d", siteHostname, port)
+	log.Printf("      siteURL: %s", siteUrl)
 }
