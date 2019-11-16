@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 )
 
 var (
@@ -62,10 +63,21 @@ func main() {
 			log.Printf("DEBUG: %s", d)
 		}
 	}
+	srv.Router().Use(loggingMiddleware)
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatalf("Unable to start godirect: %v", err)
 	}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+		// Do stuff here
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+		log.Printf("Served [%v] %s '%s', in %v", r.RemoteAddr, r.Method, r.RequestURI, time.Since(startTime))
+	})
 }
 
 func setupStatic() {
