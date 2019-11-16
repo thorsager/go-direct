@@ -27,6 +27,7 @@ jobs:
     - ./scripts/docker_build.sh -n "${TRAVIS_BUILD_ID}"
     - ./scripts/docker_tag.sh -s "${TRAVIS_BUILD_ID}" -t "${IMAGE_NAME}:${TRAVIS_TAG}"
     - ./scripts/docker_push.sh -l -n "${IMAGE_NAME}:${TRAVIS_TAG}"
+    - ./scripts/docker_push_readme.sh -f "${TRAVIS_BUILD_DIR}/README.md" -r "${IMAGE_NAME}"
 
   - stage: docker image (latest)
     if: (tag IS blank) AND (branch = master)
