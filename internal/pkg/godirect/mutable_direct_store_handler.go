@@ -3,8 +3,10 @@ package godirect
 import (
 	"encoding/json"
 	"github.com/thorsager/go-direct/internal/pkg/utl"
+	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type CreateRequest struct {
@@ -21,6 +23,7 @@ type CreateResponse struct {
 
 func DynamicDirectHandlerFunc(directorURL *url.URL, store MutableDirectStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
@@ -69,6 +72,6 @@ func DynamicDirectHandlerFunc(directorURL *url.URL, store MutableDirectStore) ht
 		if err != nil {
 			http.Error(w, "Internal Server Error\n"+err.Error(), http.StatusInternalServerError)
 		}
-
+		defer log.Printf("Created %s in %v", direct, time.Now().Sub(startTime))
 	}
 }
