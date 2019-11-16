@@ -11,8 +11,9 @@ var ( // metadata is extra build time data
 
 // GetVersion returns the semver string of the version
 func GetVersion() string {
-	if metadata == "" {
+	if //noinspection GoBoolExpressions
+	metadata == "" {
 		return version
 	}
-	return version + "+" + metadata
+	return version + "+" + metadata + "+" + gitCommit + "+" + gitTreeState
 }

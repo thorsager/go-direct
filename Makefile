@@ -33,15 +33,15 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/thorsager/godirect/internal/version.version=${BINARY_VERSION}
+	LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.version=${BINARY_VERSION}
 endif
 
 # Clear the "unreleased" string in BuildMetadata
 ifneq ($(GIT_TAG),)
-	LDFLAGS += -X github.com/thorsager/godirect/internal/version.metadata=
+	LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.metadata=
 endif
-LDFLAGS += -X github.com/thorsager/godirect/internal/version.gitCommit=${GIT_COMMIT}
-LDFLAGS += -X github.com/thorsager/godirect/internal/version.gitTreeState=${GIT_DIRTY}
+LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.gitCommit=${GIT_COMMIT}
+LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.gitTreeState=${GIT_DIRTY}
 
 # ------------------------------------------------------------------------------
 #  build

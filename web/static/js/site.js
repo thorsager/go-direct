@@ -65,7 +65,7 @@ function create_redirect() {
         console.log(`Received ${event.loaded} of ${event.total}`);
     };
     let inputUrl = document.getElementById('input_url');
-    xhr.send(JSON.stringify({code: 307, url: inputUrl.value}))
+    xhr.send(JSON.stringify({statusCode: 307, targetUrl: inputUrl.value}))
 }
 
 function validate_input() {

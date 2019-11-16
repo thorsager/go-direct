@@ -2,7 +2,10 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/thorsager/go-direct/internal/pkg/ephemeralDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/godirect"
+	"github.com/thorsager/go-direct/internal/pkg/recursiveDirectStore"
+	"github.com/thorsager/go-direct/internal/pkg/staticDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
@@ -16,7 +19,7 @@ var (
 	App       = kingpin.New("godirectd", "Go Direct").Version(version.GetVersion())
 	Debug     = App.Flag("debug", "Debug mode.").Bool()
 	Dynamic   = App.Flag("dynamic", "Enable dynamic mode").Short('d').Default("false").Bool()
-	rootStore = godirect.NewMultiStore()
+	rootStore = recursiveDirectStore.New()
 	srv       godirect.Server
 	port      int
 )
@@ -67,14 +70,14 @@ func main() {
 
 func setupStatic() {
 	if json := os.Getenv(envPermRedir); json != "" {
-		store, err := godirect.ExactMatchStoreFromJson(http.StatusMovedPermanently, json)
+		store, err := staticDirectStore.FromJson(http.StatusMovedPermanently, json)
 		if err != nil {
 			log.Fatalf("Unable to create DirectStore: %v", err)
 		}
 		rootStore.Add(store)
 	}
 	if json := os.Getenv(envTempRedir); json != "" {
-		store, err := godirect.ExactMatchStoreFromJson(http.StatusTemporaryRedirect, json)
+		store, err := staticDirectStore.FromJson(http.StatusTemporaryRedirect, json)
 		if err != nil {
 			log.Fatalf("Unable to create DirectStore: %v", err)
 		}
@@ -97,7 +100,7 @@ func setupDynamic() {
 	if siteHostname == "" {
 		log.Fatal("Site hostname is required, please set SITE_HOSTNAME")
 	}
-	dStore := godirect.NewDynamicDirectStore()
+	dStore := ephemeralDirectStore.New()
 
 	rootStore.Add(dStore)
 

@@ -2,23 +2,24 @@ package godirect
 
 import (
 	"encoding/json"
+	"github.com/thorsager/go-direct/internal/pkg/utl"
 	"net/http"
 	"net/url"
 )
 
 type CreateRequest struct {
-	Code int    `json:"code"`
-	Url  string `json:"url"`
+	Code int    `json:"statusCode"`
+	Url  string `json:"targetUrl"`
 }
 
 type CreateResponse struct {
 	Id        string `json:"id"`
-	Code      int    `json:"code"`
+	Code      int    `json:"statusCode"`
 	TargetUrl string `json:"target_url"`
 	SourceUrl string `json:"source_url"`
 }
 
-func DynamicDirectHandlerFunc(directorURL *url.URL, store *DynamicDirectStore) http.HandlerFunc {
+func DynamicDirectHandlerFunc(directorURL *url.URL, store MutableDirectStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -35,13 +36,13 @@ func DynamicDirectHandlerFunc(directorURL *url.URL, store *DynamicDirectStore) h
 			return
 		}
 
-		if !in(targetUrl.Scheme, "http", "https") {
-			http.Error(w, "Bad Request\nInvalid url scheme (http,https)", http.StatusBadRequest)
+		if !utl.In(targetUrl.Scheme, "http", "https") {
+			http.Error(w, "Bad Request\nInvalid targetUrl scheme (http,https)", http.StatusBadRequest)
 			return
 		}
 
-		if !in(cRequest.Code, http.StatusTemporaryRedirect, http.StatusMovedPermanently) {
-			http.Error(w, "Bad Request\nInvalid code (301,307)", http.StatusBadRequest)
+		if !utl.In(cRequest.Code, http.StatusTemporaryRedirect, http.StatusMovedPermanently) {
+			http.Error(w, "Bad Request\nInvalid statusCode (301,307)", http.StatusBadRequest)
 			return
 		}
 
