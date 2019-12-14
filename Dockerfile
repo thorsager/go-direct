@@ -26,4 +26,5 @@ COPY --from=build /build/web /web
 
 EXPOSE 8080
 
-ENTRYPOINT [ "/godirectd", "--dynamic", "--debug" ]
+VOLUME /data
+ENTRYPOINT [ "/godirectd" ]
