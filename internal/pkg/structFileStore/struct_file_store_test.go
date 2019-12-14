@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"reflect"
 	"testing"
 )
@@ -165,6 +166,7 @@ func TestStructFileStore_Get(t *testing.T) {
 }
 
 func TestStructFileStore_asPath(t *testing.T) {
+	tmpDir, _ := ioutil.TempDir("", "_test")
 	type fields struct {
 		path string
 	}
@@ -178,7 +180,7 @@ func TestStructFileStore_asPath(t *testing.T) {
 		want   string
 	}{
 		{"relative", fields{"rel"}, args{"af63ad4c86019caf"}, "rel/af63ad4c86019caf.json"},
-		{"absolute", fields{"/abs"}, args{"af63ad4c86019caf"}, "/abs/af63ad4c86019caf.json"},
+		{"absolute", fields{tmpDir}, args{"af63ad4c86019caf"}, path.Join(tmpDir, "af63ad4c86019caf.json")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
