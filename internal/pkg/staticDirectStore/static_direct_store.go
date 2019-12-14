@@ -49,10 +49,10 @@ func (s *StaticDirectStore) Lookup(path string) (godirect.Direct, error) {
 	return nil, godirect.NotFound(path)
 }
 
-func (s *StaticDirectStore) All() []godirect.Direct {
+func (s *StaticDirectStore) All() ([]godirect.Direct, error) {
 	var all []godirect.Direct
 	for path, url := range s.redirectMap {
 		all = append(all, &simpleDirect{path: path, statusCode: s.code, targetUrl: url})
 	}
-	return all
+	return all, nil
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/thorsager/go-direct/internal/pkg/ephemeralDirectStore"
+	"github.com/thorsager/go-direct/internal/pkg/fileDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/godirect"
 	"github.com/thorsager/go-direct/internal/pkg/recursiveDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/staticDirectStore"
@@ -30,6 +30,8 @@ const (
 	envTempRedir = "TEMPORARY_REDIRECTS"
 	envWebDir    = "WEB_DIR"
 	webDir       = "/web/static"
+	envDataDir   = "DATA_DIR"
+	dataDir      = "/data"
 )
 
 func main() {
@@ -59,7 +61,11 @@ func main() {
 	setupStatic()
 
 	if *Debug {
-		for _, d := range rootStore.All() {
+		all, err := rootStore.All()
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		for _, d := range all {
 			log.Printf("DEBUG: %s", d)
 		}
 	}
@@ -118,7 +124,14 @@ func setupDynamic() {
 		log.Fatalf("invalid DIRECTOR_URL: %s", err)
 	}
 
-	dStore := ephemeralDirectStore.New()
+	storeFolder := dataDir
+	if d := os.Getenv(envDataDir); d != "" {
+		storeFolder = d
+	}
+	dStore, err := fileDirectStore.New(storeFolder)
+	if err != nil {
+		log.Fatalf("creating store: %v", err)
+	}
 
 	rootStore.Add(dStore)
 

@@ -63,12 +63,12 @@ func (s *EphemeralDirectStore) Lookup(path string) (godirect.Direct, error) {
 	return nil, godirect.NotFound(path)
 }
 
-func (s *EphemeralDirectStore) All() []godirect.Direct {
+func (s *EphemeralDirectStore) All() ([]godirect.Direct, error) {
 	var all []godirect.Direct
 	for _, value := range s.store {
 		all = append(all, &value)
 	}
-	return all
+	return all, nil
 }
 
 func (s *EphemeralDirectStore) newId() (uint64, error) {
@@ -83,7 +83,7 @@ func (s *EphemeralDirectStore) newId() (uint64, error) {
 	return 0, fmt.Errorf("unable to find availabel id in %d rounds", maxCount)
 }
 
-func (s *EphemeralDirectStore) CreateAndAdd(code int, targetUrl *url.URL) (godirect.PersistableDirect, error) {
+func (s *EphemeralDirectStore) CreateAndAdd(code int, targetUrl *url.URL) (godirect.IdentifiedDirect, error) {
 	d, err := s.Create(code, targetUrl)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (s *EphemeralDirectStore) CreateAndAdd(code int, targetUrl *url.URL) (godir
 	return d, nil
 }
 
-func (s *EphemeralDirectStore) Create(code int, targetUrl *url.URL) (godirect.PersistableDirect, error) {
+func (s *EphemeralDirectStore) Create(code int, targetUrl *url.URL) (godirect.IdentifiedDirect, error) {
 	id, err := s.newId()
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (s *EphemeralDirectStore) Create(code int, targetUrl *url.URL) (godirect.Pe
 	return direct, nil
 }
 
-func (s *EphemeralDirectStore) Add(direct godirect.PersistableDirect) error {
+func (s *EphemeralDirectStore) Add(direct godirect.IdentifiedDirect) error {
 	ed, ok := direct.(*ephemeralDirect)
 	if !ok {
 		return fmt.Errorf("unable to do casting to *ephemeralDirect")

@@ -24,12 +24,16 @@ func (m *RecursiveDirectStore) Lookup(path string) (godirect.Direct, error) {
 	return nil, godirect.NotFound(path)
 }
 
-func (m *RecursiveDirectStore) All() []godirect.Direct {
+func (m *RecursiveDirectStore) All() ([]godirect.Direct, error) {
 	var all []godirect.Direct
 	for _, store := range m.stores {
-		all = append(all, store.All()...)
+		items, err := store.All()
+		if err != nil {
+			return all, err
+		}
+		all = append(all, items...)
 	}
-	return all
+	return all, nil
 }
 
 func (m *RecursiveDirectStore) Add(store godirect.DirectStore) {
