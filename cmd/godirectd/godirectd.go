@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/thorsager/go-direct/internal/pkg/fileDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/godirect"
+	"github.com/thorsager/go-direct/internal/pkg/logging"
 	"github.com/thorsager/go-direct/internal/pkg/recursiveDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/staticDirectStore"
 	"github.com/thorsager/go-direct/internal/pkg/version"
@@ -13,7 +14,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 )
 
 var (
@@ -69,21 +69,11 @@ func main() {
 			log.Printf("DEBUG: %s", d)
 		}
 	}
-	srv.Router().Use(loggingMiddleware)
+	srv.Router().Use(logging.Wrap)
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatalf("Unable to start godirect: %v", err)
 	}
-}
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-		// Do stuff here
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, r)
-		log.Printf("Served [%v] %s '%s', in %v", r.RemoteAddr, r.Method, r.RequestURI, time.Since(startTime))
-	})
 }
 
 func setupStatic() {

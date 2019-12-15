@@ -3,7 +3,6 @@ package godirect
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 	"time"
 )
@@ -55,13 +54,10 @@ func (s *Server) ListenAndServeTLS(certFile, keyFile string) error {
 }
 
 func (s *Server) redirect(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
 	path := r.URL.Path
 	if target, err := s.store.Lookup(path); err == nil {
-		defer log.Printf("Redirected %s in %v", target, time.Now().Sub(startTime))
 		http.Redirect(w, r, target.URL(), target.Code())
 	} else {
-		defer log.Printf("No mapping for %s - %s, (%v)", r.URL.RequestURI(), err, time.Now().Sub(startTime))
 		http.NotFound(w, r)
 	}
 }
