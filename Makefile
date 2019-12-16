@@ -2,6 +2,8 @@ BINDIR     := $(CURDIR)/bin
 #DIST_DIRS  := find * -type d -exec
 TARGETS    := darwin/amd64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le windows/amd64
 BINNAME    ?= godirectd
+MODULE     ?= github.com/thorsager/go-direct
+CMD        ?= ./cmd/godirectd
 
 GOPATH        = $(shell go env GOPATH)
 DEP           = $(GOPATH)/bin/dep
@@ -33,15 +35,15 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.version=${BINARY_VERSION}
+	LDFLAGS += -X $(MODULE)/internal/pkg/version.version=${BINARY_VERSION}
 endif
 
 # Clear the "unreleased" string in BuildMetadata
 ifneq ($(GIT_TAG),)
-	LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.metadata=
+	LDFLAGS += -X $(MODULE)/internal/pkg/version.metadata=
 endif
-LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.gitCommit=${GIT_COMMIT}
-LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.gitTreeState=${GIT_DIRTY}
+LDFLAGS += -X $(MODULE)/internal/pkg/version.gitCommit=${GIT_COMMIT}
+LDFLAGS += -X $(MODULE)/internal/pkg/version.gitTreeState=${GIT_DIRTY}
 
 # ------------------------------------------------------------------------------
 #  build
@@ -50,7 +52,7 @@ LDFLAGS += -X github.com/thorsager/go-direct/internal/pkg/version.gitTreeState=$
 build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
-	GO111MODULE=on go build $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(BINNAME) ./cmd/godirectd
+	GO111MODULE=on go build $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(BINNAME) $(CMD)
 
 
 # ------------------------------------------------------------------------------
