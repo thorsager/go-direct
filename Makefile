@@ -69,3 +69,8 @@ test-unit:
 	@echo "==> Running unit tests <=="
 	GO111MODULE=on go test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
 
+.PHONY: clean
+clean:
+	@echo
+	@echo "==> Clean up <=="
+	rm -rf $(BINDIR)
